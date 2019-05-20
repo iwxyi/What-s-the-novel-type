@@ -8,7 +8,7 @@ import chardet
 import jieba
 
 full_lines = []  # 结果的每一行
-
+full_text = ""
 
 # 获取网页源码
 def get_html(url):
@@ -25,29 +25,22 @@ def save_text_file(file_name, contents):
         f.write(contents)
 
 
-# 提取起点每一个类型的书名数组
-def add_qidian_novel_type(type_id, type_name):
-    global full_lines
-    for page in range(1, 25):  # 遍历每一页
-        html = get_html("https://www.qidian.com/rank/collect?chn=" + type_id + "&page=" + str(page))
-        names = re.findall(
-            '<h4><a href="//book.qidian.com/info/\\d+" target="_blank" data-eid="qd_C40" data-bid="\\d+">(.+?)</a></h4>'
-            , html)
-        print(type_name, "(", str(page), ") : ", len(full_lines), " : ", names)
-        for name in names:
-            full_lines += ["__label__" + type_name + " " + " ".join(jieba.cut(name))]
-
-
 def get_douluo_chapters(begin_page, end_page):
+    global full_text
     for page in range(begin_page, end_page+1):
         html = get_html("http://www.tangsanshu.com/douluodalu/"+str(page)+".html")
+        names = re.findall(
+            '<div id="content" class="showtxt">((?:.|\n)+?)</div>'
+            , html)
+        # print(names)
+        print("斗罗大陆", "(", str(page), ") : ", len(full_lines), " : ", len(names))
+        if len(names) != 0:
+            full_text += names[0]
+    save_text_file("data/douluo_chapters.txt", full_text)
 
 
 # =========================================================================
 # 斗罗大陆 http://www.tangsanshu.com/douluodalu/2253.html
 
-get_douluo_chapters(2253, 2858)
-
-random.shuffle(full_lines)  # 随机打乱顺序
-fulltext = "\n".join(full_lines)  # 组成字符串
-save_text_file('data/biquge_names.txt', fulltext)  # 保存到文件
+get_douluo_chapters(2253, 2253)
+# get_douluo_chapters(2253, 2858)
