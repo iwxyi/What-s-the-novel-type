@@ -80,16 +80,21 @@ save_text_file('data/qidian_names.txt', fulltext)  # 保存到文件
 
 调整了一下几个参数，不知道准确性如何。
 
+**训练过程**：
+
 ```python
-import fastText
-import jieba
+classifier = fastText.train_supervised("data/novel_names.txt", lr=0.1, wordNgrams=1, loss="hs")
+model = classifier.save_model("data/novel_names.model")
+# classifier = fastText.load_model("data/novel_names.model")
+```
 
 
-# 判断小说类型的调用语句
-def judge(novel):
-    print(novel, " : ", classifier.predict(" ".join(jieba.cut(novel))))
 
+## 运行示例
 
+运行之前，先**合并需要用到的语料库**：
+
+```python
 # 保存到文本文件
 def save_text_file(file_name, contents):
     with open(file_name, 'w', encoding='utf-8') as f:
@@ -102,32 +107,31 @@ fulltext = ""
 for source in sources:
     fulltext += open("data/"+source+"_names.txt", encoding='utf-8').read() + "\n"
 save_text_file("data/novel_names.txt", fulltext)
-
-
-classifier = fastText.train_supervised("data/novel_names.txt", lr=0.1, wordNgrams=1, loss="hs")
-model = classifier.save_model("data/novel_names.model")
-# classifier = fastText.load_model("data/novel_names.model")
-
-
-judge("机械囚宠：元帅亲点爱")
-judge("指掌浩瀚")
-judge("医世倾城")
-judge("夏蝉冬雪")
-
 ```
 
-
-
-## 运行示例
+**进行判断**：
 
 ```python
+# 判断小说类型的调用语句
+def judge(novel):
+    print(novel, " : ", classifier.predict(" ".join(jieba.cut(novel))))
+
 judge("机械囚宠：元帅亲点爱")
 judge("指掌浩瀚")
 judge("医世倾城")
 judge("夏蝉冬雪")
 ```
 
-![运行结果](picture/result.png)
+**运行结果**：
+
+```
+机械囚宠：元帅亲点爱  :  (('__label__都市',), array([0.52540648]))
+指掌浩瀚  :  (('__label__修真',), array([0.40694034]))
+医世倾城  :  (('__label__玄幻',), array([0.61438417]))
+夏蝉冬雪  :  (('__label__都市',), array([0.15081741]))
+```
+
+
 
 
 
